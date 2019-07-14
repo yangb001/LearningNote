@@ -1,0 +1,96 @@
+## stackstorm 19. Centos下安装stackstorm的webui
+1 检查st2安装的服务
+
+执行:
+systemctl list-units|grep st2
+输出结果样例如下:
+  st2actionrunner.service                                                                  loaded active exited    StackStorm service st2actionrunner
+  st2actionrunner@1.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@10.service                                                               loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@2.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@3.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@4.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@5.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@6.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@7.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@8.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2actionrunner@9.service                                                                loaded active running   StackStorm service st2actionrunner
+  st2api.service                                                                           loaded active running   StackStorm service st2api
+  st2auth.service                                                                          loaded active running   StackStorm service st2auth
+  st2garbagecollector.service                                                              loaded active running   StackStorm service st2garbagecollector
+  st2notifier.service                                                                      loaded active running   StackStorm service st2notifier
+  st2resultstracker.service                                                                loaded active running   StackStorm service st2resultstracker
+  st2rulesengine.service                                                                   loaded active running   StackStorm service st2rulesengine
+  st2scheduler.service                                                                     loaded active running   StackStorm service st2scheduler
+  st2sensorcontainer.service                                                               loaded active running   StackStorm service st2sensorcontainer
+  st2stream.service                                                                        loaded active running   StackStorm service st2stream
+  st2timersengine.service                                                                  loaded active running   StackStorm service st2timersengine
+  st2workflowengine.service                                                                loaded active running   StackStorm service st2workflowengine
+  system-st2actionrunner.slice                                                             loaded active active    system-st2actionrunner.slice
+  st2api.socket                                                                            loaded active running   StackStorm st2api Socket
+  st2auth.socket                                                                           loaded active running   StackStorm st2auth Socket
+  st2stream.socket                                                                         loaded active running   StackStorm st2stream Socket
+
+
+2 安装st2的web ui
+
+# Add key and repo for the latest stable nginx
+sudo rpm --import http://nginx.org/keys/nginx_signing.key
+sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
+[nginx]
+name=nginx repo
+baseurl=http://nginx.org/packages/rhel/\\\$releasever/x86_64/
+gpgcheck=1
+enabled=1
+EOT"
+
+# Install nginx, avoid epel repo in favor of nginx.org
+sudo yum --disablerepo='epel' install -y nginx
+
+# Install st2web
+sudo yum install -y st2web
+
+# Generate a self-signed certificate or place your existing certificate under /etc/ssl/st2
+sudo mkdir -p /etc/ssl/st2
+sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
+-days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
+Technology/CN=$(hostname)"
+
+# Copy and enable the supplied nginx config file
+sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
+
+# Disable default_server configuration in existing /etc/nginx/nginx.conf
+sudo sed -i 's/default_server//g' /etc/nginx/nginx.conf
+
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+
+3 访问st2的web ui
+
+访问:
+https://127.0.0.1
+默认登录的用户名:
+st2admin
+默认登录用户名的密码:
+Ch@ngeMe
+
+是可以访问StackStorm的。
+
+
+4 在界面上运行一个action
+
+点击进入ACTIONS中，选择default，
+可以查看到之前创建的action
+
+可以手动运行已经存在的action，但是不可以创建。
+其他规则，等都一样
+
+5 总结
+
+stackstorm非企业版本的webui界面只能查询action,rule,执行历史等，
+可以再次运行某个action,但是不能创建action,也不能创建rule。
+--------------------- 
+作者：天地一扁舟 
+来源：CSDN 
+原文：https://blog.csdn.net/qingyuanluofeng/article/details/88861468 
+版权声明：本文为博主原创文章，转载请附上博文链接！
