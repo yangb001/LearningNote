@@ -1,0 +1,114 @@
+https://blog.csdn.net/sxb0841901116/article/details/80012487
+
+https://blog.csdn.net/sxb0841901116/article/details/80012487
+
+firewall-cmd --zone=public --add-service=http --add-service=https
+firewall-cmd --zone=public --permanent --add-service=http --add-service=https
+
+https://blog.csdn.net/sxb0841901116/article/details/79860153
+
+安装包地址：
+https://packagecloud.io/StackStorm/stable
+
+ st2-3.1.0-2.x86_64.rpm
+  st2web-3.1.0-1.x86_64.rpm
+   st2mistral-3.1.0-1.x86_64.rpm
+    st2chatops-3.1.0-2.x86_64.rpm
+    
+    
+ST2： https ： //packagecloud.io/StackStorm/stable/ubuntu/
+Mongodb： http：//repo.mongodb.org/apt/ubuntu trusty / mongodb-org / 3.2
+Nodejs： https ：//deb.nodesource.com/node_6.x
+Nginx： http ： //nginx.org/packages/ubuntu/
+
+
+
+
+在脱机系统上安装StackStorm
+2017年2月10日
+，Siddharth Krishna
+
+想在无法访问互联网的机器上安装StackStorm吗？如果本地网络上有另一个连接到公共网络的盒子，则可以通过将其设置为本地包存储库服务器来完成此操作。在这篇文章中，我们将引导您完成设置带有所需软件包的apt-mirror服务器的步骤，并配置脱机客户端计算机以快速启动并运行完整的StackStorm安装！
+
+
+注意：我们在镜像服务器上使用Ubuntu，因此在此示例中使用apt-mirror。您可以在运行RHEL / CentOS的情况下构建本地Yum存储库。
+
+设置镜像
+1）假设您已经有一个apt-mirror服务器，其中包含适用于Ubuntu发行版的软件包：请参阅此处的示例指南。作为其中一部分，您还需要安装Apache Web服务器。它用于通过HTTP从客户端计算机（ST2安装目标）访问存储库。
+
+2）应在本地软件包存储库中提供以下软件包，以便完整安装StackStorm（包括Web UI，Chatops等）：
+
+ST2： https ： //packagecloud.io/StackStorm/stable/ubuntu/
+Mongodb： http：//repo.mongodb.org/apt/ubuntu trusty / mongodb-org / 3.2
+Nodejs： https ：//deb.nodesource.com/node_6.x
+Nginx： http ： //nginx.org/packages/ubuntu/
+将这些程序包的自定义存储库URL详细信息添加到服务器上的apt mirror.list文件中。
+
+sudo vi /etc/apt/mirror.list
+..
+deb https://packagecloud.io/StackStorm/stable/ubuntu/ trusty main
+deb http://repo.mongodb.org/apt/ubuntu trusty / mongodb-org / 3.2 multiverse
+deb https://deb.nodesource.com/node_6.x trusty main
+deb http://nginx.org/packages/ubuntu/ trusty nginx
+
+deb-src https://packagecloud.io/StackStorm/stable/ubuntu/ trusty main
+..
+3）更新镜像以在本地镜像上下载所需的包：sudo apt-mirror
+
+应该在apt-mirror基本路径（set base_path）中创建每个新包的目录：
+
+/aptmirror/mirror/packagecloud.io/StackStorm/stable/ubuntu/
+/aptmirror/mirror/repo.mongodb.org/apt/ubuntu/
+/aptmirror/mirror/deb.nodesource.com/node_6.x/
+/aptmirror/mirror/nginx.org/packages/ubuntu/
+使Repos可访问
+4）通过创建指向/var/www/html/目录中每个存储库的符号链接，在本地镜像上配置Web服务器，以便通过HTTP从客户端计算机访问存储库。
+
+brocade @ apt-mirror ：/ var / www / html $ ls -l
+总计0
+lrwxrwxrwx 1 root root 46 Jan 9 04:29 mongodb  - > /aptmirror/mirror/repo.mongodb.org/apt/ubuntu/
+lrwxrwxrwx 1 root root 44 Jan 10 02:30 nginx  - > /aptmirror/mirror/nginx.org/packages/ubuntu/
+lrwxrwxrwx 1 root root 46 Jan 9 04:29 nodejs  - > /aptmirror/mirror/deb.nodesource.com/node_6.x/
+lrwxrwxrwx 1 root root 47 Jan 9 04:29 st2  - > /aptmirror/mirror/packagecloud.io/StackStorm/stable/ubuntu/
+lrwxrwxrwx 1 root root 44 Jan 9 02:44 ubuntu  - > /aptmirror/mirror/archive.ubuntu.com/ubuntu/
+重新启动Web服务器： sudo service apache2 restart
+
+在Web浏览器中验证存储库目录结构： http://local-mirror-ip/
+
+设置脱机客户端系统
+5）修改apt源以指向所有包的本地镜像服务器 - Ubuntu，ST2，MongoDb，NodeJS和Nginx。替换mirror为本地镜像服务器的主机名或IP：
+
+sudo vi /etc/apt/sources.list
+注释掉（＃）所有现有内容并替换为以下内容：
+
+deb http：// mirror / ubuntu / trusty主要限制宇宙多元宇宙
+deb http：// mirror / ubuntu / trusty-security主要限制宇宙多元宇宙
+deb http：// mirror / ubuntu / trusty-updates主要限制宇宙多元宇宙
+
+deb http：// mirror / st2 trusty_stable main
+deb http：// mirror / mongodb / trusty / mongodb-org / 3.2 multiverse
+deb http：// mirror / nodejs trusty main
+deb http：// mirror / nginx trusty nginx
+更新包信息： sudo apt-get update
+
+GPG关键错误？
+此时，您可能会遇到客户端上自定义程序包的一些GPG签名错误：
+
+The following signatures couldn't be verified because the public key is not available: NO_PUBKEY
+
+要解决此问题，请执行以下操作：
+
+在服务器上：
+
+sudo apt-key adv --keyserver hkp：//keyserver.ubuntu.com:80 --recv
+sudo apt-key export> exportedkey
+将exportedkey文件移动到客户端。
+注意：如果您遇到多个键的错误，您可以使用以下代码：
+
+ sudo apt-key exportall> exportedkey（s） 
+在客户端：
+
+sudo apt-key add exportedkey（s）
+重试 apt-get update
+
+6）现在可以使用sudo apt-get install –y命令从本地镜像服务器下载所有必需的包。单行安装过程不适用于此系统。您需要按照此处记录的手动安装步骤进行操作。或者更好的是，使用Ansible之类的东西来配置你的系统。请注意，您无需在客户端系统上设置任何自定义存储库。我们已经通过指向本地存储库服务器来完成此操作。请直接使用安装依赖项sudo apt-get install –y st2|st2mistral|mongodb|nginx|nodejs|st2chatops。
