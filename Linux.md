@@ -12,6 +12,7 @@ init 3	#切换命令行界面
 
 ```
 curl -sSL https://stackstorm.com/packages/install.sh | bash -s -- --user=st2admin --password=Ch@ngeMe
+在vi中，:wq /opt/md1    #保存文件到/opt/md1
 ```
 
 ##### 2、设置网卡
