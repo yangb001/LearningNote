@@ -15,7 +15,7 @@ init 3	#切换命令行界面
 系统运行级别：	cat  /etc/inittab
 
 | 代号 | 级别                        | 示例                                        |
-| :--- | :-------------------------- | :------------------------------------------ |
+| ---- | --------------------------- | ------------------------------------------- |
 | 0    | 关机                        | init 0：关机                                |
 | 1    | 单用户                      | init 1：类型windows安全模式，只启动核心服务 |
 | 2    | 不完全多用户，不包含NFS服务 | init 2：不包含网络文件系统的命令行          |
@@ -26,534 +26,107 @@ init 3	#切换命令行界面
 
 备注：centos7下已经不使用runlevel
 
-> ADDING CONFIGURATION HERE WILL HAVE NO EFFECT ON YOUR SYSTEM. Ctrl-Alt-Delete is handled by /usr/lib/systemd/system/ctrl-alt-del.target systemd uses 'targets' instead of runlevels. By default, there are two main targets: 	multi-user.target: analogous to runlevel 3 	graphical.target: analogous to runlevel 5 To view current default target, run: 	systemctl get-default To set a default target, run: 	systemctl set-default TARGET.target
+> ADDING CONFIGURATION HERE WILL HAVE NO EFFECT ON YOUR SYSTEM.
+> Ctrl-Alt-Delete is handled by /usr/lib/systemd/system/ctrl-alt-del.target
+> systemd uses 'targets' instead of runlevels. By default, there are two main targets:
+> 	multi-user.target: analogous to runlevel 3
+> 	graphical.target: analogous to runlevel 5
+> To view current default target, run:
+> 	systemctl get-default
+> To set a default target, run:
+> 	systemctl set-default TARGET.target
 
  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
+```bash
+useradd  user1		#新增用户
+passwd	user1	#新增密码
 ```
-useradd  user1      #新增用户
-```
-
-2
-
-```
-passwd  user1   #新增密码
-```
-
-
-
-
 
 ##### 2、设置网卡
 
-
-
-```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
+```bash
 ip addr 
-```
-
-2
-
-```
-ifconfig    #此时没有ip地址
-```
-
-3
-
-```
+ifconfig	#此时没有ip地址
 cd /etc/sysconfig/network-scripts
-```
-
-4
-
-```
 vi ifcfg-xxx  #将其中的 onboot=no改为  onboot=yes（默认不启动网卡）
+esc  :wq	#退出vi编辑器
+service network restart	#重启网卡，就有ip了
 ```
-
-5
-
-```
-esc  :wq    #退出vi编辑器
-```
-
-6
-
-```
-service network restart #重启网卡，就有ip了
-
-```
-
-
-
-
 
 ##### 3、注意知识：
 
-- linux严格区分大小写
-- linux里面一切以文件为保存形式，包括硬盘
-- linux不存在文件扩展名
+- [x] linux严格区分大小写
+- [x] linux里面一切以文件为保存形式，包括硬盘
+- [x] linux不存在文件扩展名
 
 ## 2、常用命令
 
 ##### 1、目录处理命令及部分文件处理命令
 
+```bash
+ctrl+l  或者 clear 	 #清屏
+ctrl+c		# 终止任何一个命令
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
-ctrl+l  或者 clear     #清屏
-
-```
-
-2
-
-```
-ctrl+c      # 终止任何一个命令
-
-```
-
-3
-
-```
-
-```
-
-4
-
-```
-ls      # 显示当前目录结构
-
-```
-
-5
-
-```
-ls  -a 显示隐藏
-
-```
-
-6
-
-```
-ls  -l 显示全部详细信息     -h（人性化显示）
-
-```
-
-7
-
-```
-    -rwxrwxrwx 1  root root 1205  3月3 08：11 abc.config
-
-```
-
-8
-
-```
-     第一部分 第1字符(-表示文件 d表示目录 l表示软链接文件)    
-
-```
-
-9
-
-```
-            2-9字符（前3个=所有者=u，中间3个=所属组=g，最后3个=other=o)
-
-```
-
-10
-
-```
-            r读 w写 x执行
-
-```
-
-11
-
-```
+ls		# 显示当前目录结构
+ls	-a 显示隐藏
+ls	-l 显示全部详细信息		-h（人性化显示）
+	-rwxrwxrwx 1  root root 1205  3月3 08：11 abc.config
+	 第一部分 第1字符(-表示文件 d表示目录 l表示软链接文件) 	
+    		2-9字符（前3个=所有者=u，中间3个=所属组=g，最后3个=other=o)
+    		r读 w写 x执行
      引用次数，所有者，所属组，大小，最后修改时间，文件名
-
-```
-
-12
-
-```
-
-```
-
-13
-
-```
+     
 ls  -d 显示当前目录本身属性
-
-```
-
-14
-
-```
 ls  -i 显示文件inode节点号（一个inode不一定对应一个文件，硬链接文件特殊）
 
-```
-
-15
-
-```
-
-```
-
-16
-
-```
 mkdir  创建目录命令
-
-```
-
-17
-
-```
 mkdir -p 循环创建目录
-
-```
-
-18
-
-```
-mkdir /opt/d1  /opt/d2 /tmp/df3     批量创建目录
-
-```
-
-19
-
-```
+mkdir /opt/d1  /opt/d2 /tmp/df3		批量创建目录
 pwd  显示当前的绝对路径
+.表示当前目录		..表示当前目录的上级目录
 
-```
-
-20
-
-```
-.表示当前目录     ..表示当前目录的上级目录
-
-```
-
-21
-
-```
-
-```
-
-22
-
-```
-cp /s1.cnfig /s2.cnfig  /root   复制文件（最后修改的时间会变化）
-
-```
-
-23
-
-```
-cp -p /s1.cnfig /s2.cnfig  /root/改名.cnfig   复制文件（保留原始的修改时间）
-
-```
-
-24
-
-```
+cp /s1.cnfig /s2.cnfig  /root	复制文件（最后修改的时间会变化）
+cp -p /s1.cnfig /s2.cnfig  /root/改名.cnfig	复制文件（保留原始的修改时间）
 cp -r /opt/d3 /home  复制目录
 
-```
+mv /s1 /root/改名	 剪贴文件或目录
 
-25
-
-```
-
-```
-
-26
-
-```
-mv /s1 /root/改名  剪贴文件或目录
-
-```
-
-27
-
-```
-
-```
-
-28
-
-```
-rmdir /opt/d2   删除空目录（不常用）
-
-```
-
-29
-
-```
-rm  删除文件
-
-```
-
-30
-
-```
+rmdir /opt/d2	删除空目录（不常用）
+rm	删除文件
 rm -r 删除目录
-
-```
-
-31
-
-```
 rm -f 强制删除（不提示询问）
-
 ```
-
-
-
-
 
 ##### 2、文件处理命令
 
-
-
-```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
-touch       创建文件（）
-
-```
-
-2
-
-```
+```bash
+touch 		创建文件（）
 touch "program files"  创建带空格的文件名
 
-```
-
-3
-
-```
-
-```
-
-4
-
-```
 cat  文件浏览命令（比较适合浏览短一些的文件）
-
-```
-
-5
-
-```
 cat -n 浏览的时候加行号
-
-```
-
-6
-
-```
 tac  倒着来浏览文件
 
+more 	#浏览文件（适合大文件）
+	f/空格   #向后翻页/向下一行
+	Enter	 #换行显示
+	q/Q		 #退出
+less  	#浏览文件（适合大文件）
+	f/空格   #向后翻页
+	Enter	 #换行显示
+	q/Q		 #退出
+	上箭头/PageUp	#向上一行/向上翻页
+	/abc 回车		#搜索 abc		（高亮显示以后  按n 向下继续查找）
+	
+head -n 10 /etc/services	#查看services文件的前10行（不加 -n 10 时默认显示前10行）
+tail -n 10 /etc/services	#查看services文件的后10行（不加 -n 10 时默认显示后10行）
+tail -f /etc/services	#动态实时监控文件末尾
+
+ln -s /etc/issue /tmp/issue.soft	#软链接文件，类似windws快捷方式
+ln /etc/issue /tmp/issue.hard		#硬链接文件，能同步更新，删除互时不影响
+									#硬链接不能跨分区，不能对目录使用
 ```
-
-7
-
-```
-
-```
-
-8
-
-```
-more    #浏览文件（适合大文件）
-
-```
-
-9
-
-```
-    f/空格   #向后翻页/向下一行
-
-```
-
-10
-
-```
-    Enter    #换行显示
-
-```
-
-11
-
-```
-    q/Q      #退出
-
-```
-
-12
-
-```
-less    #浏览文件（适合大文件）
-
-```
-
-13
-
-```
-    f/空格   #向后翻页
-
-```
-
-14
-
-```
-    Enter    #换行显示
-
-```
-
-15
-
-```
-    q/Q      #退出
-
-```
-
-16
-
-```
-    上箭头/PageUp  #向上一行/向上翻页
-
-```
-
-17
-
-```
-    /abc 回车     #搜索 abc     （高亮显示以后  按n 向下继续查找）
-
-```
-
-18
-
-```
-
-```
-
-19
-
-```
-head -n 10 /etc/services    #查看services文件的前10行（不加 -n 10 时默认显示前10行）
-
-```
-
-20
-
-```
-tail -n 10 /etc/services    #查看services文件的后10行（不加 -n 10 时默认显示后10行）
-
-```
-
-21
-
-```
-tail -f /etc/services   #动态实时监控文件末尾
-
-```
-
-22
-
-```
-
-```
-
-23
-
-```
-ln -s /etc/issue /tmp/issue.soft    #软链接文件，类似windws快捷方式
-
-```
-
-24
-
-```
-ln /etc/issue /tmp/issue.hard       #硬链接文件，能同步更新，删除互时不影响
-
-```
-
-25
-
-```
-                                    #硬链接不能跨分区，不能对目录使用
-
-```
-
-
-
-
 
 ##### 3、权限管理命令
 
@@ -561,80 +134,20 @@ ln /etc/issue /tmp/issue.hard       #硬链接文件，能同步更新，删除�
 
 ​		只有root及文件的所有者能修改权限
 
-
-
-```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
-chmod   #修改权限
-
-```
-
-2
-
-```
-1.chmod u+w,g-r,o+r /name.config        +表示增加，-表示减少
-
-```
-
-3
-
-```
+```bash
+chmod 	#修改权限
+1.chmod u+w,g-r,o+r /name.config		+表示增加，-表示减少
 2.chmod u=rwx,g=rw,o=r  /name.config
+3.	对应数字：   r=4,  w=2,	x=1
+	chmod 777 /name.config	 # eg:777=rwxrwxrwx,642=rw-r---w-
 
+chmod -R /opt 		# 递归修改目录中的文件权限
 ```
-
-4
-
-```
-3.  对应数字：   r=4,  w=2,  x=1
-
-```
-
-5
-
-```
-    chmod 777 /name.config   # eg:777=rwxrwxrwx,642=rw-r---w-
-
-```
-
-6
-
-```
-
-```
-
-7
-
-```
-chmod -R /opt       # 递归修改目录中的文件权限
-
-```
-
-
-
-
 
 权限字符说明：
 
 |      | 名称     | 对文件                                 | 对目录                                           |
-| :--- | :------- | :------------------------------------- | :----------------------------------------------- |
+| ---- | -------- | -------------------------------------- | ------------------------------------------------ |
 | r    | 读权限   | 查看文件内容\| cat/more/less/head/tail | 能列出目录中的内容 \| ls                         |
 | w    | 写权限   | 修改文件内容 \|vim                     | 能在目录中创建、删除文件 \| touch,rm,mkdir/rmdir |
 | x    | 执行权限 | 执行文件 \| script,command             | 能进入目录 \| cd                                 |
@@ -643,54 +156,12 @@ chmod -R /opt       # 递归修改目录中的文件权限
 
 ​	只有root可以更改所有者及所属组
 
+```bash
+chown [用户] [文件或目录]		#改变文件的所有者
 
-
+groupadd group1				#新增用户组 group1
+chgrp [所属组] [文件及目录]		#改变所属组
 ```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
-chown [用户] [文件或目录]      #改变文件的所有者
-
-```
-
-2
-
-```
-
-```
-
-3
-
-```
-groupadd group1             #新增用户组 group1
-
-```
-
-4
-
-```
-chgrp [所属组] [文件及目录]     #改变所属组
-
-```
-
-
-
-
 
 ###### 3、创建文件及目录的缺省
 
@@ -700,292 +171,63 @@ chgrp [所属组] [文件及目录]     #改变所属组
 
 ​	umask 定义了一个目录的缺省权限
 
-
-
+```bash
+umask -S		#创建文件时的默认权限 u=rwx,g=rx,o=rx
+umask 022	#设置默认的权限，异或
+			# 777=rwxrwxrwx, 022=----w--w-,异或结果为 rwxr-xr-x=755
+			# 所以umask 022 后默认的目录权限是 rwxr-xr-x,文件权限是 rw-r--r--
 ```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
-umask -S        #创建文件时的默认权限 u=rwx,g=rx,o=rx
-
-```
-
-2
-
-```
-umask 022   #设置默认的权限，异或
-
-```
-
-3
-
-```
-            # 777=rwxrwxrwx, 022=----w--w-,异或结果为 rwxr-xr-x=755
-
-```
-
-4
-
-```
-            # 所以umask 022 后默认的目录权限是 rwxr-xr-x,文件权限是 rw-r--r--
-
-```
-
-
-
-
 
 ##### 4、文件搜索命令
 
 - find会占用服务器资源，建议少用，
 
-
-
-```
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-1
-
-```
+```bash
 find [搜索范围] [匹配条件]
 
-```
-
-2
-
-```
-
-```
-
-3
-
-```
 匹配条件：
-
-```
-
-4
-
-```
--name   根据文件名搜索，严格区分大小写
-
-```
-
-5
-
-```
-    find / -name name       #全局搜索文件名为 name 的文件，严格区分大小写
-
-```
-
-6
-
-```
-    find / -name *name*     #文件名模糊搜索，严格区分大小写
-
-```
-
-7
-
-```
-    find / -name ?name???   #?匹配单个字符，严格区分大小写
-
-```
-
-8
-
-```
--iname  根据文件名搜索，不区分大小写
-
-```
-
-9
-
-```
-    find / -iname *name*    #文件名模糊搜索，不区分大小写
-
-```
-
-10
-
-```
+-name 	根据文件名搜索，严格区分大小写
+    find / -name name		#全局搜索文件名为 name 的文件，严格区分大小写
+    find / -name *name*		#文件名模糊搜索，严格区分大小写
+    find / -name ?name???	#?匹配单个字符，严格区分大小写
+-iname 	根据文件名搜索，不区分大小写
+	find / -iname *name*	#文件名模糊搜索，不区分大小写
 -size 根据文件大小搜索，+n 大于，-n小于，n 等于，1数据块=512byte=0.5K，
+	find / -size +204800    #在根目录下搜索大于100MB的文件  100MB=102400K=204800数据块
+-user 	根据所有者查找
+-group	根据所属组查找
 
-```
-
-11
-
-```
-    find / -size +204800    #在根目录下搜索大于100MB的文件  100MB=102400K=204800数据块
-
-```
-
-12
-
-```
--user   根据所有者查找
-
-```
-
-13
-
-```
--group  根据所属组查找
-
-```
-
-14
-
-```
-
-```
-
-15
-
-```
--amin   根据访问时间查找 access minitus
-
-```
-
-16
-
-```
--cmin   根据修改文件属性时间查找 change minitus
-
-```
-
-17
-
-```
--mmin   根据修改文件内容时间查找 modify minitus
-
-```
-
-18
-
-```
-    find / -cmin -5  #查找5分钟内被修改过属性的文件和目录  +5表示5分钟以前被修改过的
-
-```
-
-19
-
-```
+-amin	根据访问时间查找 access minitus
+-cmin	根据修改文件属性时间查找 change minitus
+-mmin	根据修改文件内容时间查找 modify minitus
+	find / -cmin -5  #查找5分钟内被修改过属性的文件和目录  +5表示5分钟以前被修改过的
 -type  f文件，d目录，l软链接文件 #根据文件类型查找
-
-```
-
-20
-
-```
--inum   根据i节点查找（可以查找硬链接）
-
-```
-
-21
-
-```
-    find / -type d
-
-```
-
-22
-
-```
-
-```
-
-23
-
-```
+-inum	根据i节点查找（可以查找硬链接）
+	find / -type d
+	
 条件连接符：
-
+-a 		 and
+-o 		 or
+	find / -size +102400 -a -size -204800  #查找文件大小在 50MB与100MB之间的文件
+-exec/-ok [命令] {} \;	对搜索结果执行操作  {}表示查询结果，-ok会有询问确认
+	find / -inum 31351 -exec rm {} \;
 ```
-
-24
-
-```
--a       and
-
-```
-
-25
-
-```
--o       or
-
-```
-
-26
-
-```
-    find / -size +102400 -a -size -204800  #查找文件大小在 50MB与100MB之间的文件
-
-```
-
-27
-
-```
--exec/-ok [命令] {} \;    对搜索结果执行操作  {}表示查询结果，-ok会有询问确认
-
-```
-
-28
-
-```
-    find / -inum 31351 -exec rm {} \;
-
-```
-
-
-
-
 
 - locate	从命令维护的文件库中查找，速度快，更新不及时
 
     ​				/tmp 文件中的文件不收录
 
-```
+```bash
 locate -i yangm		# -i 表示  大小写匹配
 updatedb	# 更新文件库
-
 ```
 
 - which  查找命令所在目录，及命令是否有别名
 
-```
+```bash
 which cp
     alias cp='cp -i'
         /bin/cp
-
 ```
 
 - whereis cp	查找命令所在位置，命令帮助文档所在位置
@@ -994,16 +236,15 @@ which cp
 
     ​	-i 不区分大小写   -v 排除指定字符串
 
-```
+```bash
 grep -iv   [指定字串] [文件]
 grep -v # /etc/ss.config	#排除掉文件中有#号的行
 grep -v ^# /etc/ss.config	#排除掉开头有#号的行 
-
 ```
 
 ##### 5、文件压缩解压命令
 
-```
+```bash
 gzip/gunzip		#压缩格式为 .gz ，不能压缩目录，不保留原文件
 
 tar -c	打包
@@ -1021,12 +262,11 @@ zip/unzip			#保留原文件
 
 bzip2/bunzip2		#gzip的升级,生产 .bz2
 	-k  压缩完保留原文件
-
 ```
 
 ##### 6、用户管理命令
 
-```
+```bash
 useradd yangb001	#新增用户
 passwd	yangb001	#给用户设置密码
 who				#查看服务器登录用户
@@ -1037,12 +277,11 @@ w		#查看登录用户详细信息
 	PCPU	最后一次命令执行时间
 	WHAT	最后一条执行命令
 	
-
 ```
 
 ##### 7、网络命令
 
-```
+```bash
 write <用户名>		#给 在线 用户发信息
 	enter Ctrl+D结束
 wall [message]		#给所有在线用户发信息  write all
@@ -1084,7 +323,7 @@ umount	/dev/sr0 或者 umount /mnt/cdrom	#卸载硬件
 
 ##### 8、关机重启命令
 
-```
+```bash
 shutdown [选项] 时间
 	-c	取消前一个关机命令
 	-h	关机
@@ -1100,12 +339,12 @@ logout 	#退出登录
 > vi/vim 	[filename]    #进入或者新建文本文件
 
 | 工作模式 | 进入            |
-| :------- | :-------------- |
+| -------- | --------------- |
 | 命令模式 | 默认进入，ESC键 |
 | 编辑模式 | ：进入编辑模式  |
 | 插入模式 | i a o           |
 
-```
+```bash
 插入命令：
 	a	在光标所在字符后面插入
 	A	在光标所在字符行尾插入
@@ -1175,4 +414,6 @@ map [快捷键] [触发命令]	#定义快捷键
 :ab mail mymail@163.com		#替换
 		输入mail 空格回车，会替换为mymail@163.com
 ```
+
+
 
