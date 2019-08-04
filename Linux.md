@@ -1,4 +1,3 @@
-
 # Linux：
 
 以前的一台：  root/yangb001
@@ -556,7 +555,60 @@ rm -rf /opt/s1		#卸载
 
 name:password:UID:GID:GECOS:directory:shell
 
+#### 2、用户密码文件/etc/shadow
 
+#### 3、组信息文件/etc/group
+
+#### 4、组密码文件/etc/gshadow
+
+#### 5、邮件目录	/var/spool/mail/user1
+
+#### 6、初始模板文件
+
+
+
+### 2、用户操作 
+
+```bash
+#用户操作
+useradd	修改
+usermod
+userdel
+
+su - use1 	#切换到user1用户，- 表示连环境一起切换
+env	#可以查看用户所在的环境信息
+
+```
+
+
+
+## 6、ACL权限
+
+```bash
+#查看分区ACL权限是否开启
+dumpe2fs -h /dev/sda3  -h 仅显示超级块信息而不显示磁盘块组的详细信息
+#临时开启分区ACL权限
+mount -o remount,acl /	# -o,支持特殊挂载选项
+
+#永久开启分区ACL
+vi /etc/fstab		#系统开机自动挂载文件
+mount -o remount /	#重新挂载使修改生效
+
+getfacl	[文件或目录]	#查看文件或目录acl权限
+setfacl [文件或目录]	#设置acl
+
+#最大有效权限
+mask	#制定最大有效权限，需要与赋予的权限“相与”之后才是真正用户得到的权限
+setfacl -m m:rwx [文件名]	#修改最大有效权限
+
+#删除acl权限
+setfacl -x u：用户名/组名 [文件名]	
+
+#递归acl权限与默认acl权限
+
+```
+
+## 7、权限管理-文件特殊权限
 
 
 
