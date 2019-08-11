@@ -9,3 +9,12 @@ action类比于方法，方法中调用上传的脚本。workflow类似于方法
 class实现缓存及存储数据库	action及workflow定义缓存并存储到数据库	5
 workflow流程流转功能	每次调用生成一个本地实例，存储action结果及互相调用，实现action变量发布，流程启动，跳转，返回值功能，存储结果	14
 action与workflow的api调用功能	对外暴露接口	3
+
+https://www.flowable.org/docs/userguide/index.html#processDefinitionCacheConfiguration
+https://www.jianshu.com/p/efd06a32148d
+
+https://blog.csdn.net/hxxzbgkf/article/details/78521462
+
+https://blog.csdn.net/xnf1991/article/details/52675396
+
+https://blog.csdn.net/vacblog/article/details/80875788
