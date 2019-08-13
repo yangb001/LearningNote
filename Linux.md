@@ -241,6 +241,7 @@ which cp
 grep -iv   [指定字串] [文件]
 grep -v # /etc/ss.config	#排除掉文件中有#号的行
 grep -v ^# /etc/ss.config	#排除掉开头有#号的行 
+
 ```
 
 ##### 5、文件压缩解压命令
@@ -263,6 +264,7 @@ zip/unzip			#保留原文件
 
 bzip2/bunzip2		#gzip的升级,生产 .bz2
 	-k  压缩完保留原文件
+
 ```
 
 ##### 6、用户管理命令
@@ -278,6 +280,7 @@ w		#查看登录用户详细信息
 	PCPU	最后一次命令执行时间
 	WHAT	最后一条执行命令
 	
+
 ```
 
 ##### 7、网络命令
@@ -320,6 +323,7 @@ mount [-t 文件系统] 设备文件名 挂载点	#挂载命令
 	插入光盘后， mkdir /mnt/cdrom
 	mount -t iso9660(固定) /dev/sr0（固定） /mnt/cdrom	#挂载光盘
 umount	/dev/sr0 或者 umount /mnt/cdrom	#卸载硬件
+
 ```
 
 ##### 8、关机重启命令
@@ -331,6 +335,7 @@ shutdown [选项] 时间
 	-r	重启
 	shutdown -h now/20：30	shutdown -r now
 logout 	#退出登录
+
 ```
 
 ## 3、文本编辑器 Vim
@@ -414,6 +419,7 @@ map [快捷键] [触发命令]	#定义快捷键
 
 :ab mail mymail@163.com		#替换
 		输入mail 空格回车，会替换为mymail@163.com
+
 ```
 
 ## 4、软件包管理
@@ -451,6 +457,7 @@ rpm2cpio [包全名] | cpio -idv .[提取路径]	#从包中的提取路径提取
 	rpm2cpio	#将rpm格式转换为cpio格式
 	e.g.： rpm2cpio /mnt/cdrom/packages/coreutils-8.22-23.el7.x86_64 | cpio -idv ./bin/ls
 	
+
 ```
 
 ###### 2、rpm管理-yum在线安装
@@ -471,6 +478,7 @@ yum所在位置：
 cat CentOS-Base.repo	#默认使用的网络yum源
 	[base]		#容器名称
 	name	#说明
+
 ```
 
 - yum命令（服务区安装规则，最小化安装，尽量不卸载，或不使用yum卸载）
@@ -485,6 +493,7 @@ yum -y remove [包名]	#卸载
 yum grouplist	#软件包组
 yum groupinstall [包组名]	#安装软件包
 yum groupremove [包组名]	#卸载包组
+
 ```
 
 - yum光盘安装
@@ -497,6 +506,7 @@ yum groupremove [包组名]	#卸载包组
 修改光盘yum源文件： CentOS-Media.repo
 	enabled=1	#使之生效
 	
+
 ```
 
 ##### 3、源码包与rpm包区别
@@ -517,6 +527,7 @@ rpm包安装后可以使用系统服务管理命令
 /etc/rc.d/init.d/httpd start
 
 service httpd start
+
 ```
 
 ##### 4、源码包安装与卸载
@@ -533,6 +544,7 @@ make	#编译(此时不会往安装路径下写信息，即不会安装)
 make install	#编译安装
 
 rm -rf /opt/s1		#卸载
+
 ```
 
 ## 5、用户和用户组管理
@@ -643,6 +655,7 @@ sticky bit
 	# 普通用户只能删除此目录下的自己建立的文件，就算拥有w权限也不能随意删除文件
 chmod 1755 /abc
 
+
 ```
 
 ### 3、chattr 权限  文件系统属性权限
@@ -659,6 +672,7 @@ lsattr	[选项] [文件名]
 touch abc
 chattr +i abc	#增加i选项
 lsattr abc	#查看attr权限
+
 
 ```
 
@@ -690,7 +704,87 @@ man 5 viduso #查看 visudo操作的配置文件的帮助信息
 
 
 
+## 7、文件系统管理
 
+### 2、文件系统常用命令
 
+#### 1、常用查询命令
 
+```bash
+#	文件系统查看命令
+df [选项] [挂载点]	
+	-a 显示所有文件系统信息
+	-h	人性化显示文件容量
+	-T	显示文件系统类型
+	
+# 统计目录或文件夹大小(会扫描文件系统，占用资源比较高)
+du [选项] [文件名或目录]
+	-a	显示所有文件，不仅仅是目录
+	-h	人性化
+	-s	只显示总和
+	
+df命令与du命令的区别：
+	df是从文件系统考虑，不光考虑文件占用空间，还统计被命令或程序占用的空间（最常见的是已经被删除但程序并没有释放空间）
+	du从文件考虑，只会计算文件及目录的大小
+	
+# 文件系统修复命令
+fsck [选项] [分区设备文件名]
+	
+# 显示磁盘状态命令 dump ext2/ext3/ext4 filesystem information
+dumpe2fs
+
+```
+
+#### 2、挂载命令
+
+```bash
+# 查询与自动挂载
+mount [-l]	#查询系统中已挂载的设备，-l会显示卷标名称
+
+mount -a	#依据配置文件 /etc/fstab 的内容，自动挂载
+
+# 挂载
+mount [-t 文件系统] [-L 卷标名] [-o 特殊选项] [设备文件名] [挂载点]
+	-t 文件系统：加入文件系统类型来指定挂载的类型
+	-L 卷标名： 挂载指定的卷标的分区，而不是安装设备的文件名
+	
+-o 特殊选项举例：
+	exec/noexec	设定是否允许文件系统中执行可执行文件，默认允许
+	remount	重新挂载
+	rw/ro	读写/只读
+```
+
+```bash
+cd /tmp
+touch hello.sh
+vi hello.sh
+---
+!# /bin/bash
+echo "hello world!"
+---
+chmod 755 hello.sh
+./hello.sh	
+/tmp/hello.sh
+
+mv hello.sh /home
+mount -o remount,noexec /home
+./hello.sh	#此时由于文件系统不允许，无法执行脚步
+```
+
+#### 3、挂载u盘与光盘
+
+```bash
+# 在虚拟机中链接光盘 
+mount /dev/cdrom /media		#光盘默认为 /dev/cdrom 或 /dev/sr0
+
+# 卸载命令
+umount [挂载点]/[设备文件名]
+umount	/media
+
+# 挂载u盘（在虚拟机中挂载，鼠标在虚拟机中时插入u盘，虚拟机才会识别u盘）
+fdisk -l	查询u盘设备号
+mkdir /mnt/usb
+mount -t vfat /dev/sdb1 /mnt/usb
+	ps： linux默认不支持NTFS文件系统
+```
 
