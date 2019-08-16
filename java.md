@@ -694,3 +694,316 @@ class DProxy implements InvocationHandler{
 >
 > 同样的，final方法是不能重载的，所以也不能通过CGLIB代理，遇到这种情况不会抛异常，而是会跳过final方法只代理其他方法。
 
+## 4、java动态生成class方式
+
+<https://www.cnblogs.com/yanjie-java/p/7940929.html>
+
+## 5、类加载器
+
+<https://www.cnblogs.com/yixianyixian/p/8145506.html>
+
+<http://www.blogjava.net/zhuxing/archive/2008/08/08/220841.html>
+
+<https://www.ibm.com/developerworks/cn/java/j-lo-classloader/>
+
+> 第一篇：java类加载原理解析
+>
+> 第二篇：插件环境下类加载原理解析
+>
+> 第三篇：线程上下文类加载器
+
+### 1、类加载器基本概念
+
+> A class loader is an object that is responsible for loading classes. The class ClassLoader is an abstract class. Given the binary name of a class, a class loader should attempt to locate or generate data that constitutes a definition for the class. A typical strategy is to transform the name into a file name and then read a "class file" of that name from a file system.
+>
+> 类加载器是一个能够加载类的对象，ClassLoader类是一个抽象类。给一个类的二进制名称，一个类加载器应该尝试去定位或者生成这个类定义的结构数据。典型的策略是将name转换为文件名，然后从文件系统中读取该name对应的“类文件”。
+
+```
+顾名思义，类加载器就是将类从硬盘（网络）加载到java虚拟机的内存中。一般情况下（特殊情况是啥？），java虚拟机从开始转换一个类的过程如下：
+
+一个java源文件（.java）通过java编译器编译以后，生成java字节码文件(.class)，通过类加载器（ClassLoader）将字节码文件加载到虚拟机中，转化为java.lang.Class的一个实例（即我们平常说的Class对象），再通过此类的newInstance() 方法（或者 new XXX()）就可以创建无数个此类的实例（实例化）：）
+```
+
+
+
+- java.lang.ClassLoader介绍
+
+  除了启动类加载器（bootstrap classloader）是由C++编写以外（先得有一个可以加载初始化java类的加载器），所有的类加载器都是java.lang.ClassLoader的实例。类加载器的工作就是找到.class的字节码文件，读取文件byte生成该类对应的Class实例。除此之外，`ClassLoader`还负责加载 Java 应用所需的资源，如图像文件和配置文件等。不过只讨论其加载类的功能。
+
+| 部分方法                                             | 说明                                                         |
+| :--------------------------------------------------- | :----------------------------------------------------------- |
+| defineClass(String name, byte[] b, int off, int len) | Converts an array of bytes into an instance of class `Class`（5、若parent加载失败，在findClass方法中调用此方法自己加载） |
+| findClass(String name)                               | Finds the class with the specified binary name.（2、查找class） |
+| getParent()                                          | Returns the parent class loader for delegation.（4、尝试让parent classloader去加载） |
+| findLoadedClass(String name)                         | Returns the class with the given binary name if this loader has been recorded by the Java virtual machine as an initiating loader of a class with that binary name（3、查看是否已经被加载） |
+| loadClass(String name)                               | Loads the class with the specified binary name.（1、加载类的起点位置，供用户调用） |
+
+### 2、类加载器结构
+
+#### 1、jvm预定义的三种类加载器
+
+java虚拟机（JVM）定义的类加载器主要分为两类，一类是系统预定义的，另一类是由开发人员自己实现的，系统预定义的加载器有三类：
+
+- 引导/启动 类加载器（bootstrap class loader）: 引导类加载器是用本地代码（C++）代码实现的。它负责将<Java_Runtime_Home>/lib 下面的类库或者被-Xbootclasspath参数限定的类 加载进虚拟机内存中，开发者无法直接获取到引导类加载器
+- 扩展类加载器（extension class loader）： 扩展类加载器是ClassLoader的一个子类，负责将 <Java_Runtime_Home>/lib/ext 下面的类库或者被java.ext.dirs系统变量指定的类加载进虚拟机内存中，开发者可以调用。其实现为 rt.jar中的sun.misc.Launcher$ExtClassLoader
+- 系统类加载器（system class loader）： 系统类加载器负责将应用程序的类路径（classpath）中的类库加载到内存中。开发者可以调用，实现为 rt.jar中的sun.misc.Launcher$AppClassLoader
+
+除以上加载器外，还有特殊的线程上下文类加载器，将在以后介绍
+
+#### 2、双亲委派机制
+
+> 双亲委派机制指的是类加载器在加载类时，并不会直接加载，而是先委托给其parent类加载器，依次递归，如果parent加载器能够加载成功，就返回；否则就自己加载
+
+![继承关系](D:\filespaces\images\classloader.png)
+
+类加载器都是继承自ClassLoader的类，包括我们后面要实现的自定义类加载器，也要继承ClassLoader。下面是主要的一些方法
+
+| 部分方法                                             | 说明                                                         |
+| :--------------------------------------------------- | :----------------------------------------------------------- |
+| defineClass(String name, byte[] b, int off, int len) | Converts an array of bytes into an instance of class `Class`（5、若parent加载失败，在findClass方法中调用此方法自己加载）不可继承，只需调用 |
+| findClass(String name)                               | Finds the class with the specified binary name.（2、查找class） |
+| getParent()                                          | Returns the parent class loader for delegation.（4、尝试让parent classloader去加载） |
+| findLoadedClass(String name)                         | Returns the class with the given binary name if this loader has been recorded by the Java virtual machine as an initiating loader of a class with that binary name（3、查看是否已经被加载） |
+| loadClass(String name，boolean resolve)              | Loads the class with the specified binary name.（1、加载类的起点位置，供用户调用）resolve表示是否解析 |
+
+分析ExtClassLoader与AppClassLoader看出，这些类都没有重写loadClass的方法，因此我们可以查看ClassLoader中的loadClass方法来分析双亲委派机制
+
+```java
+protected Class<?> loadClass(String name, boolean resolve)
+    throws ClassNotFoundException
+    {
+        synchronized (getClassLoadingLock(name)) {
+            // First, check if the class has already been loaded
+            Class<?> c = findLoadedClass(name);
+            if (c == null) {
+                long t0 = System.nanoTime();
+                try {
+                    if (parent != null) {
+                        c = parent.loadClass(name, false);
+                    } else {
+                        c = findBootstrapClassOrNull(name);
+                    }
+                } catch (ClassNotFoundException e) {
+                    // ClassNotFoundException thrown if class not found
+                    // from the non-null parent class loader
+                }
+
+                if (c == null) {
+                    // If still not found, then invoke findClass in order
+                    // to find the class.
+                    long t1 = System.nanoTime();
+                    c = findClass(name);
+
+                    // this is the defining class loader; record the stats
+                    sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);
+                    sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);
+                    sun.misc.PerfCounter.getFindClasses().increment();
+                }
+            }
+            if (resolve) {
+                resolveClass(c);
+            }
+            return c;
+        }
+    }
+```
+
+当我们自定义一个类加载器以后，其调用规则为：
+
+![](D:\filespaces\images\classLoader-parent.png)
+
+
+
+> 每个classLoader和其parent classLoader并不是继承关系，而是在classLoader内部有个parent变量，该变量指向了parent classLoader，通过getParent()方法就可以获取到其parent 加载器
+>
+> System.out.println(ClassLoader.getSystemClassLoader()); 
+>
+> System.out.println(ClassLoader.getSystemClassLoader().getParent();
+>
+> System.out.println(ClassLoader.getSystemClassLoader().getParent().getParent());
+>
+> 输出：
+>
+> **sun.misc.Launcher$AppClassLoader@197d257**
+>
+> **sun.misc.Launcher$ExtClassLoader@7259da**
+>
+> **null**
+
+**为什么获取扩展类加载器能获取到，获取引导类加载器为null？**
+
+> 我们首先看一下java.lang.ClassLoader抽象类中默认实现的两个构造函数：
+>
+> ```java
+> **protected** ClassLoader() {
+>    
+>     SecurityManager security = System.*getSecurityManager*();
+>    
+>     **if** (security != **null**) {
+>    
+>         security.checkCreateClassLoader();
+>    
+>     }
+>    
+>     **//****默认将父类加载器设置为系统类加载器，****getSystemClassLoader()****获取系统类加载器**
+>    
+>     **this**.parent = getSystemClassLoader();
+>    
+>     initialized = **true**;
+>    
+> }
+>    
+> **protected** ClassLoader(ClassLoader parent) {
+>    
+>     SecurityManager security = System.*getSecurityManager*();
+>    
+>     **if** (security != **null**) {
+>    
+>         security.checkCreateClassLoader();
+>    
+>     }
+>    
+>     **//****强制设置父类加载器**
+>    
+>     **this**.parent = parent;
+>    
+>     initialized = **true**;
+>    
+> } 
+> ```
+>
+>
+>
+> 我们看一下ClassLoader抽象类中parent成员的声明：
+>
+>
+>
+> // The parent class loader for delegation
+>
+>  **private** ClassLoader parent;
+
+声明为私有变量的同时并没有对外提供可供派生类访问的public或者protected设置器接口（对应的setter方法），结合前面的测试代码的输出，我们可以推断出：
+
+1. 系统类加载器（AppClassLoader）调用ClassLoader(ClassLoader parent)构造函数将父类加载器设置为标准扩展类加载器(ExtClassLoader)。（因为如果不强制设置，默认会通过调用getSystemClassLoader()方法获取并设置成系统类加载器，这显然和测试输出结果不符。）
+
+2. 扩展类加载器（ExtClassLoader）调用ClassLoader(ClassLoader parent)构造函数将父类加载器设置为null。（因为如果不强制设置，默认会通过调用getSystemClassLoader()方法获取并设置成系统类加载器，这显然和测试输出结果不符。）
+
+   **有关java.lang.ClassLoader中默认的加载委派规则前面已经分析过，如果父加载器为null，则会调用本地方法进行启动类加载尝试。所以启动类加载器、标准扩展类加载器和系统类加载器之间的委派关系事实上是仍就成立的。**
+
+
+
+#### 3、双亲委派示例
+
+在项目中创建一个类 GeClass，编译打包为jar文件。拷入到 <java_runtime_home>/bin/ext下，此时在扩展类的路径下与项目的classpath下都存在GeClass这个类，执行以下代码查看输出：
+
+```java
+public static void main(String[] args) throws Exception {
+	test01();
+} 
+/**
+  * 测试移动类的位置以后，是否会被不同的类加载器加载：
+  *
+  * 当项目classpath 与 /JAVA_HOME/jre/lib/ext下同时存在一个完全匹配类名（Fully Qualified Class Name）相同的类时，就会委托给 ExtClassLoader 加载 /lib/ext下的类
+  * 删掉/bin/ext下的类时，AppClassLoader 才会加载本地项目指定的classpath中的类
+  */
+public static void test01() throws Exception {
+    //System.out.println(System.getProperty("java.class.path"));
+    //      Class<?> mouse = null;
+    //      mouse = Class.forName("com.huawei.omplatform.common.GenClass");
+    GenClass mouse = new GenClass();
+    //System.out.println(mouse.getClass());
+    System.out.println(mouse.getClass().getClassLoader());
+}
+
+--------------------
+sun.misc.Launcher$ExtClassLoader@14dad5dc
+```
+
+当我们把拷入到 <java_runtime_home>/bin/ext下的jar包移除时，重新执行代码
+
+```java
+--------------------
+sun.misc.Launcher$AppClassLoader@14dad5dc
+```
+
+当我们把包拷入到 <java_runtime_home>/bin下时，重新执行代码
+
+```java
+--------------------
+sun.misc.Launcher$AppClassLoader@14dad5dc
+```
+
+这说明：放置在<java_runtime_home>/bin/ext下的代码会被先加载，然后不会再去加载项目classpath下的类；当放置在<java_runtime_home>/bin下时，并不会被加载，而是由AppClassLoader来加载，这是因为**虚拟机出于安全等因素考虑，不会加载< Java_Runtime_Home >/lib存在的陌生类，开发者通过将要加载的非JDK自身的类放置到此目录下期待启动类加载器加载是不可能的。**
+
+#### 4、获取javapath的方式
+
+```java
+/**
+     *  在运行时获取 类加载器能够加载哪些路径下的类的方法
+     */
+public static void test03(){
+    // 1. 系统类加载器与 扩展类加载器都继承自 URLClassLoader， getUrls方法
+    URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+
+    // 获取到扩展类加载器
+    //URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader().getParent();
+    for (URL url : urlClassLoader.getURLs()) {
+        System.out.println(url);
+    }
+    // 2. 获取系统属性 java.class.path来查看
+    System.out.println(System.getProperty("java.class.path"));
+    System.getProperty("sun.boot.class.path")；
+        System.getProperty("java.ext.dirs") 
+}
+```
+
+
+
+### 3、java程序动态扩展方式
+
+```
+Java的连接模型允许用户运行时扩展引用程序，既可以通过当前虚拟机中预定义的加载器加载编译时已知的类或者接口，又允许用户自行定义类装载器，在运行时动态扩展用户的程序。通过用户自定义的类装载器，你的程序可以装载在编译时并不知道或者尚未存在的类或者接口，并动态连接它们并进行有选择的解析。
+
+运行时动态扩展java应用程序有如下两个途径：
+```
+
+#### 1、Class.forName(...)
+
+```java
+@CallerSensitive
+public static Class<?> forName(String className)
+    throws ClassNotFoundException {
+    Class<?> caller = Reflection.getCallerClass();
+    return forName0(className, true, ClassLoader.getClassLoader(caller), caller);
+}
+public static Class<?> forName(String name, boolean initialize,
+                                   ClassLoader loader)
+	throws ClassNotFoundException{
+    ...
+}
+```
+
+```
+**这里的initialize参数表示加载完class以后是否进行初始化，如若不指定，默认会完成初始化。**
+
+有些场景下需要将initialize设置为true来强制加载同时完成初始化。例如典型的就是利用DriverManager进行JDBC驱动程序类注册的问题。因为每一个JDBC驱动程序类的静态初始化方法都用DriverManager注册驱动程序，这样才能被应用程序使用。这就要求驱动程序类必须被初始化，而不单单被加载。
+```
+
+#### 2、自定义类加载器
+
+```
+通过前面的分析我们知道，我们可以调用除了引导类加载器以外的所有加载器来加载我们指定的类。所有我们在程序运行时就可以利用这个特性来动态载入我们想要载入的类（唯一的区别是不会被虚拟机默认载入）。
+```
+
+```java
+public Class<?> loadClass(String name) throws ClassNotFoundException {
+    return loadClass(name, false);
+}
+```
+
+```
+需要注意的是，**使用此种方式加载的class不会被初始化**。这是与Class.forName()不用之处
+
+```
+
+### 4、常见问题分析
