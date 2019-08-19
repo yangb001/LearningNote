@@ -89,6 +89,14 @@ vi/home/guok/.bash.profile添加如下内容：exportCLASSPATH=./JAVAHOME/lib;JA
 该变量只在当前的shell(BASH)或其子shell(BASH)下是有效的，
 shell关闭了，变量也就失效了，再打开新shell时就没有这个变量，需要使用的话还需要重新定
 ```
+###### 4、修改 、etc/profile文件出错的处理办法
+```bash
+ export PATH=/usr/bin:/usr/sbin:/bin:/sbin:/usr/X11R6/bin
+
+或者
+
+/bin/vi /etc/profile 重新编辑完以后，执行上面一条命令
+```
 
 ## 2、常用命令
 
