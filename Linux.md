@@ -60,6 +60,36 @@ service network restart	#重启网卡，就有ip了
 - [x] linux里面一切以文件为保存形式，包括硬盘
 - [x] linux不存在文件扩展名
 
+##### 4、环境变量设置
+
+```bash
+env	#查看所有环境变量
+```
+
+###### 1、永久对所有用户生效
+
+```bash
+vi /etc/profile		#修改配置文件
+source /etc/profile	#使配置立即生效
+```
+
+###### 2、永久对单个用户有效
+
+```bash
+在用户目录下的.bash_profile文件中增加变量【对单一用户生效(永久的)】 
+用VI在用户目录下的.bash_profile文件中增加变量，改变量仅会对当前用户有效，并且是“永久的”。 
+例如：编辑guok用户目录(/home/guok)下的.bash_profile 
+vi/home/guok/.bash.profile添加如下内容：exportCLASSPATH=./JAVAHOME/lib;JAVA_HOME/jre/lib 
+注：修改文件后要想马上生效还要运行$ source /home/guok/.bash_profile不然只能在下次重进此用户时生效
+```
+###### 3、临时生效
+
+```bash
+在shell的命令行下直接使用[export 变量名=变量值] 定义变量，
+该变量只在当前的shell(BASH)或其子shell(BASH)下是有效的，
+shell关闭了，变量也就失效了，再打开新shell时就没有这个变量，需要使用的话还需要重新定
+```
+
 ## 2、常用命令
 
 ##### 1、目录处理命令及部分文件处理命令
