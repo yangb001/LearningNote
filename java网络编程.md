@@ -783,7 +783,7 @@ public class NioClient {
 - 网络层
 - 传输层
 - 应用层
-
+<https://muyinchen.github.io/2019/01/03/BIO%E5%88%B0NIO%E6%BA%90%E7%A0%81%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E5%84%BF%E4%B9%8BNIO%20%E4%B8%8A/>
 
 
 ## 一些操作
@@ -799,4 +799,17 @@ public class NioClient {
    int port = serverSocket.getLocalPort();
    System.out.println("系统分配的端口号 port="+port);
 ```
+### 2、NIO连接pending处理
+
+问题：bio客户端连接服务端时，channel一直处于pending状态
+
+方法： 在每次连接时添加
+
+```java
+boolean connectionPending = socketChannel.isConnectionPending();
+if (connectionPending) {
+    socketChannel.finishConnect();
+}
+```
+
 
