@@ -1,3 +1,7 @@
+---
+
+---
+
 # Linux：
 
 以前的一台：  root/yangb001
@@ -629,6 +633,151 @@ su - use1 	#切换到user1用户，- 表示连环境一起切换
 env	#可以查看用户所在的环境信息
 
 ```
+
+## 4、软件包管理
+
+
+
+##### 2、rpm命令管理
+
+###### 1、rpm手动安装
+
+```bash
+安装命令：
+rpm -ivh 包全名	i install v verbose(显示详细信息) h hash (显示进度)
+
+卸载命令：
+rpm -e 包名
+
+查询命令：
+rpm -q [包名] #查询包是否安装
+rpm -qa # 查询所有已经安装的rpm包
+rpm -qi [包名] #查询软件包的信息	i infomation
+rpm -qip [包全名] #查询未安装包的信息
+rpm -ql [包名] #查询包中文件的安装位置 l list
+rpm -qlp [包全名]	#查询未安装包的即将安装位置
+rpm -qf [系统文件名]	#查询系统文件名属于哪个包 f file
+rpm -qR [包名]	#查询软件包的依赖性
+rpm -qRp [包全名]	#查询未安装软件包的依赖性
+e.g. rpm -qf /bin/ls		#查询ls命令属于哪个包
+
+文件校验：
+rpm -v [文件]		文件校验
+
+RPM包中文件提取：(可以在误删时最小化恢复)
+rpm2cpio [包全名] | cpio -idv .[提取路径]	#从包中的提取路径提取文件 保存在.
+	rpm2cpio	#将rpm格式转换为cpio格式
+	e.g.： rpm2cpio /mnt/cdrom/packages/coreutils-8.22-23.el7.x86_64 | cpio -idv ./bin/ls
+	
+```
+
+###### 2、rpm管理-yum在线安装
+
+- Ip地址配置和网络yum源
+
+```bash
+进入网络配置界面：
+setup	
+nmtui	#centos 7下
+	配置网络ip及网关等信息
+	vi /etc/sysconfig/network-scripts/ifcfg-eth0
+		把ONBOOT='no'改为yes ，表示开机启动网卡
+	service network restart		#重启网络服务
+	
+yum所在位置：
+/etc/yum.repos.d/
+cat CentOS-Base.repo	#默认使用的网络yum源
+	[base]		#容器名称
+	name	#说明
+```
+
+- yum命令（服务区安装规则，最小化安装，尽量不卸载，或不使用yum卸载）
+
+```bash
+yum list #查询服务器上可用的软件列表
+yum search [名称]	#查询包
+yum -y install [包名]	#安装包  -y 自动回答yes
+yum -y update [包名]	#升级安装包（不加包名时会升级包括内核在内的包，很有可能会出问题）
+yum -y remove [包名]	#卸载
+
+yum grouplist	#软件包组
+yum groupinstall [包组名]	#安装软件包
+yum groupremove [包组名]	#卸载包组
+```
+
+- yum光盘安装
+
+```bash
+挂载光盘：
+	参照前面
+使网络yum源失效：
+	修改yum文件名称/在yum文件中添加 enabled=0   mv CentOS-Base.repo CentOS-Base.repo.bak
+修改光盘yum源文件： CentOS-Media.repo
+	enabled=1	#使之生效
+	
+```
+
+##### 3、源码包与rpm包区别
+
+rpm包安装在默认位置中
+
+| 默认路径        | 说明                       |
+| --------------- | -------------------------- |
+| /etc/           | 配置文件                   |
+| /usr/bin/       | 可执行的命令安装目录       |
+| /usr/lib/       | 程序所使用的函数库所在位置 |
+| /usr/share/doc/ | 基本的软件使用手册         |
+| /usr/share/man/ | 帮助文件保存位置           |
+
+rpm包安装后可以使用系统服务管理命令
+
+```bash
+/etc/rc.d/init.d/httpd start
+
+service httpd start
+```
+
+##### 4、源码包安装与卸载
+
+```bash
+#软件配置与检查
+./configure
+#定义需要的功能选项，检测系统环境是否符合，把定义好的选项和环境信息 写入Makefile文件，用于后续编辑
+
+e.g ./configure --prefix=/opt/s1		#定义安装位置
+
+make	#编译(此时不会往安装路径下写信息，即不会安装)
+	make clean #清空编译产生的临时文件
+make install	#编译安装
+
+rm -rf /opt/s1		#卸载
+```
+
+## 5、用户和用户组管理
+
+### 1、用户配置文件
+
+#### 1、用户信息文件/etc/passwd
+
+- 第一字段： 用户名称
+
+- 第二字段： 密码标志
+
+- 第三字段： UID（用户ID）
+
+    ​	0： 超级用户
+
+    ​    1-499： 系统用户（伪用户）
+
+    ​    500-65535： 普通用户
+
+name:password:UID:GID:GECOS:directory:shell
+
+
+
+
+
+
 
 
 
